@@ -55,7 +55,8 @@ void checkvolt()
 {
   lastime = timenow;
   voltage = analogRead(sensorPin);
-  Serial.print("Mahalo decivoltage ");  // tell the computer hello
+  if (digitalRead(wheelchairpower) == 1) Serial.print("chair ON: decivoltage ");
+  else Serial.print("OFF is chair: decivoltage ");
   Serial.println(voltage);             // and tell it the voltage in decivolts
   if (power == true) {
     if (voltage < lowvolt) count -= 1;

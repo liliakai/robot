@@ -14,6 +14,7 @@ const int backward = 6;  // backward is not inverted (255 = max)
 const int right = 10;   // right IS inverted (0 = max)
 const int left = 11;  // left is NOT inverted (255 = max)
 const int wheelchairpower = 8; // HIGH turns on wheelchair joystick relay
+const int driveswitchpin = 2;  // LOW means "drive B" and HIGH means "drive A"
 
 const int lowvolt = 180;  // voltage below which is considered low
 const int okayvolt = 190;  // voltage above which is considered okay
@@ -39,6 +40,8 @@ void setup() {
   digitalWrite(right,HIGH);  // right IS inverted
   digitalWrite(left,LOW);  // left is NOT inverted
   digitalWrite(wheelchairpower,LOW);  // power defaults to OFF
+  digitalWrite(driveswitchpin,LOW);  // drive defaults to LOW = drive B
+  pinMode(driveswitchpin,OUTPUT);
   pinMode(wheelchairpower,OUTPUT);
   pinMode(forward,OUTPUT);
   pinMode(backward,OUTPUT);
@@ -91,6 +94,20 @@ void PowerON(byte value)
     digitalWrite(wheelchairpower,LOW);
     command = 0;
   }
+}
+
+void Driveset(byte value)
+{
+  value &= 223;
+  if (value == 'A') {
+    digitalWrite(driveswitchpin,HIGH);
+    Serial.println("Drive A");
+  }
+  if (value == 'B') {
+    digitalWrite(driveswitchpin,LOW);
+    Serial.println("B Drive");
+  }
+  command = 0;
 }
 
 void Forward(byte value)
@@ -166,6 +183,9 @@ void getabyte(){
     break;
   case 'R':
     Right(Serial.read());
+    break;
+  case 'D':
+    Driveset(Serial.read());
     break;
   case 'P':
     PowerON(Serial.read());  // IF P IS FOLLOWED BY LOWERCASE Z, POWER WILL TURN ON

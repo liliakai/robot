@@ -6,18 +6,18 @@ const int sensorPin = 0;    // select the input pin for the battery voltage
 const int powerswitch = 12; // select the pin for the power on/off transistor
 // THESE PIN NUMBERS MAY NEED TO BE SWITCHED AROUND
 // i think forward is pins 2,3 on the 25-pin connector
-// backward is pins 4,5   right is pins 6,7    left pins 8,9
+// backward is pins 4,5   left is pins 6,7    right pins 8,9
 const int forward = 5;    // forward is inverted (0 = max)
 const int backward = 6;  // backward is not inverted (255 = max)
-const int left = 10;   // left is not inverted (255 = max)
-const int right = 11;  // right is inverted (0 = max)
+const int right = 10;   // right IS inverted (0 = max)
+const int left = 11;  // left is NOT inverted (255 = max)
 
 const int lowvolt = 180;  // voltage below which is considered low
 const int okayvolt = 190;  // voltage above which is considered okay
 const int turnonvolt = 240;  // voltage above which turns power back on
 const int lowcount = 25;  //readings of low voltage before turn-off
 const int readrate = 1000;  //milliseconds between battery readings
-const int commandexpires = 1000;  //milliseconds before direction command expires
+const int commandexpires = 500;  //milliseconds before direction command expires
 
 int voltage,count;  // variable to store the value coming from the sensor
 boolean power = true;  // stores the state of main power on/off transistor
@@ -31,12 +31,12 @@ unsigned long lastcommand = 0;  //  last time we received a command
 void setup() {
   digitalWrite(forward,HIGH);  // forward is inverted
   digitalWrite(backward,LOW);  // backward is not inverted
-  digitalWrite(left,LOW);  // left is not inverted
-  digitalWrite(right,HIGH);  // right is inverted
+  digitalWrite(right,HIGH);  // right IS inverted
+  digitalWrite(left,LOW);  // left is NOT inverted
   pinMode(forward,OUTPUT);
   pinMode(backward,OUTPUT);
-  pinMode(left,OUTPUT);
   pinMode(right,OUTPUT);
+  pinMode(left,OUTPUT);
   pinMode(powerswitch, OUTPUT);
   digitalWrite(powerswitch, power);  // turn on power switch
   digitalWrite(sensorPin,LOW);  // do not want pull-up resistor
@@ -108,11 +108,11 @@ void Forward(byte value)
   command = 0;
 }
 
-void Right(byte value)
+void Left(byte value)
 {
-  analogWrite(left,0);  // left is not inverted (255 = max);
-  analogWrite(right,255-value);  // right is inverted (0 = max);
-  Serial.print("Right ");
+  analogWrite(right,255);  // right IS inverted (0 = max);
+  analogWrite(left,value);  // left is NOT inverted (255 = max);
+  Serial.print("Left ");
   Serial.println(value);
   lastcommand = timenow;
   heading = command;
@@ -130,11 +130,11 @@ void Backward(byte value)
   command = 0;
 }
 
-void Left(byte value)
+void Right(byte value)
 {
-  analogWrite(right,255);  // right is inverted (0 = max);
-  analogWrite(left,value);  // left is not inverted (255 = max);
-  Serial.print("Left ");
+  analogWrite(left,0);  // left is NOT inverted (255 = max);
+  analogWrite(right,255-value);  // right IS inverted (0 = max);
+  Serial.print("Right ");
   Serial.println(value);
   lastcommand = timenow;
   heading = command;
@@ -143,16 +143,16 @@ void Left(byte value)
 
 void Stop()
 {
-//  analogWrite(forward,255);  // forward is inverted (0 = max);
-//  analogWrite(backward,0);  // backward is not inverted (255 = max);
-//  analogWrite(right,255);  // right is inverted (0 = max);
-//  analogWrite(left,0);  // left is not inverted (255 = max);
+  analogWrite(forward,255);  // forward is inverted (0 = max);
+  analogWrite(backward,0);  // backward is not inverted (255 = max);
+  analogWrite(right,255);  // right IS inverted (0 = max);
+  analogWrite(left,0);  //  left is NOT inverted (255 = max);
   Serial.println("STOP!");
-  digitalWrite(forward,HIGH);  // forward is inverted
-  digitalWrite(backward,LOW);  // backward is not inverted
-  digitalWrite(left,LOW);  // left is not inverted
-  digitalWrite(right,HIGH);  // right is inverted
-  delay(1000);
+//  digitalWrite(forward,HIGH);  // forward is inverted
+//  digitalWrite(backward,LOW);  // backward is not inverted
+//  digitalWrite(right,LOW);  // right is not inverted
+//  digitalWrite(left,HIGH);  // left is inverted
+//  delay(1000);
   heading = 'S';
   command = 0;
 }

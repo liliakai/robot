@@ -21,7 +21,7 @@ const int turnonvolt = 240;  // voltage above which turns power back on
 const int lowcount = 25;  //readings of low voltage before turn-off
 const int readrate = 1000;  //milliseconds between battery readings
 const int commandexpires = 500;  //milliseconds before direction command expires
-const int wheelchairpowerexpires = 2000;  //milliseconds before wheelchair power-on command expires
+const int wheelchairpowerexpires = 5000;  //milliseconds before wheelchair power-on command expires
 
 int voltage,count;  // variable to store the value coming from the sensor
 boolean power = true;  // stores the state of main power on/off transistor
@@ -51,19 +51,11 @@ void setup() {
   Serial.begin(57600);
 }
 
-void loop() {
-  timenow = millis();
-  if (timenow - lastime >= readrate) checkvolt(); // if x time has passed since lastime, read voltage and control power
-  if (timenow - lastcommand >= commandexpires) if (heading != 'S') Stop();  // stop if x time has passed since last command
-  if (timenow - lastwcpoweron >= wheelchairpowerexpires) PowerON(0); // turn off wheelchair power
-  if (Serial.available() > 0) getabyte();      // if a serial character is read to be read, read and deal with it
-}
-
 void checkvolt()
 {
   lastime = timenow;
   voltage = analogRead(sensorPin);
-  Serial.print("Aloha! decivoltage ");  // tell the computer hello
+  Serial.print("Mahalo decivoltage ");  // tell the computer hello
   Serial.println(voltage);             // and tell it the voltage in decivolts
   if (power == true) {
     if (voltage < lowvolt) count -= 1;
@@ -82,36 +74,13 @@ void checkvolt()
     }
 }
 
-void getabyte(){
-  switch(command) {
-  case 'F':
-    Forward(Serial.read());
-    break;
-  case 'B':
-    Backward(Serial.read());
-    break;
-  case 'L':
-    Left(Serial.read());
-    break;
-  case 'R':
-    Right(Serial.read());
-    break;
-  case 'P':
-    PowerON(Serial.read());  // IF P IS FOLLOWED BY LOWERCASE Z, POWER WILL TURN ON
-    break;                   // POWER-ON COMMAND EXPIRES AFTER wheelchairpowerexpires MILLISECONDS
-  default:                   // P FOLLOWED BY ANY OTHER CHARACTER TURNS WHEELCHAIR POWER OFF
-    command = Serial.read();
-    if (command == 'S') Stop();
-    break;
-  }
-}
-
 void PowerON(byte value)
 {
   if (value == 122) {  // LOWERCASE Z
     digitalWrite(wheelchairpower,HIGH);
     if (timenow - lastwcpoweron >= wheelchairpowerexpires) Serial.println("Wheelchair Power ON");
     lastwcpoweron = timenow;
+    command = 0;
   } 
   else if (value == 0) {  // DONT PRINT ANYTHING WHEN TIMEOUT HAPPENS
     digitalWrite(wheelchairpower,LOW);
@@ -119,6 +88,7 @@ void PowerON(byte value)
   else {
     Serial.println("Wheelchair Power DISABLED");
     digitalWrite(wheelchairpower,LOW);
+    command = 0;
   }
 }
 
@@ -182,5 +152,35 @@ void Stop()
   command = 0;
 }
 
+void getabyte(){
+  switch(command) {
+  case 'F':
+    Forward(Serial.read());
+    break;
+  case 'B':
+    Backward(Serial.read());
+    break;
+  case 'L':
+    Left(Serial.read());
+    break;
+  case 'R':
+    Right(Serial.read());
+    break;
+  case 'P':
+    PowerON(Serial.read());  // IF P IS FOLLOWED BY LOWERCASE Z, POWER WILL TURN ON
+    break;                   // POWER-ON COMMAND EXPIRES AFTER wheelchairpowerexpires MILLISECONDS
+  default:                   // P FOLLOWED BY ANY OTHER CHARACTER TURNS WHEELCHAIR POWER OFF
+    command = Serial.read();
+    if (command == 'S') Stop();
+    break;
+  }
+}
 
+void loop() {
+  timenow = millis();
+  if (timenow - lastime >= readrate) checkvolt(); // if x time has passed since lastime, read voltage and control power
+  if (timenow - lastcommand >= commandexpires) if (heading != 'S') Stop();  // stop if x time has passed since last command
+  if (timenow - lastwcpoweron >= wheelchairpowerexpires) PowerON(0); // turn off wheelchair power
+  if (Serial.available() > 0) getabyte();      // if a serial character is read to be read, read and deal with it
+}
 

@@ -1,12 +1,13 @@
+// version 7 and on modified for inverted power transistor control
 // CAUTION:  THE ARDUINO CONTROLS POWER TO THE COMPUTER.  IF YOU REBOOT
-// THE ARDUINO, SUCH AS WHEN YOU ARE PROGRAMMING IT, IT WILL CUT POWER TO
-// THE COMPUTER UNLESS YOU SHORT THE POWER TRANSISTOR "ON" WITH THE BLACK
-// ALLIGATOR CLIPLEAD BY CLIPPING THE FREE END TO GROUND.  YOU HAVE BEEN WARNED.
+// THE ARDUINO, SUCH AS WHEN YOU ARE PROGRAMMING IT, IT COULD CUT POWER TO
+// THE COMPUTER UNLESS YOU DISCONNECT THE YELLOW WIRE GOING TO THE SCREW
+// TERMINAL ON THE ARDUINO.  YOU HAVE BEEN WARNED.
 const int sensorPin = 0;    // select the input pin for the battery voltage
 const int powerswitch = 12; // select the pin for the power on/off transistor
-// THESE PIN NUMBERS MAY NEED TO BE SWITCHED AROUND
-// i think forward is pins 2,3 on the 25-pin connector
-// backward is pins 4,5   left is pins 6,7    right pins 8,9
+// IF powerswitch IS SET TO HIGH, IT WILL TURN OFF THE COMPUTER POWER.
+// forward is pins 2,3 on the 25-pin connector
+// backward is pins 4,5   right is pins 6,7    left pins 8,9
 const int forward = 5;    // forward is inverted (0 = max)
 const int backward = 6;  // backward is not inverted (255 = max)
 const int right = 10;   // right IS inverted (0 = max)
@@ -38,7 +39,7 @@ void setup() {
   pinMode(right,OUTPUT);
   pinMode(left,OUTPUT);
   pinMode(powerswitch, OUTPUT);
-  digitalWrite(powerswitch, power);  // turn on power switch
+  digitalWrite(powerswitch, !power);  // turn on power switch
   digitalWrite(sensorPin,LOW);  // do not want pull-up resistor
   pinMode(sensorPin, INPUT);
   Serial.begin(57600);
@@ -63,13 +64,13 @@ void checkvolt()
     if (count < 1) {
       count = 0;
       power = false;
-      digitalWrite(powerswitch, power);
+      digitalWrite(powerswitch, !power);
     }
   }
   if (power == false)
     if (voltage > turnonvolt) {
       power = true;
-      digitalWrite(powerswitch, power);
+      digitalWrite(powerswitch, !power);
       count = lowcount;
     }
 }

@@ -1,12 +1,6 @@
-const int sensorPin = 0;    // select the input pin for the potentiometer
-const int powerswitch = 12;      // select the pin for the LED
-const int forward = 5;
-const int backward = 6;
-const int left = 10;
-const int right = 11;
+int sensorPin = 0;    // select the input pin for the potentiometer
+int powerswitch = 12;      // select the pin for the LED
 int voltage,count;  // variable to store the value coming from the sensor
-unsigned long timenow,lastime;
-
 const int lowtime = 25;  //seconds of low voltage = turn off
 boolean power = 1;
 

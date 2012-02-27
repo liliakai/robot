@@ -26,7 +26,7 @@ void loop() {
   if (timenow - lastime >= readrate) {
   lastime = timenow;
     voltage = analogRead(sensorPin);
-  Serial.print("Aloha");
+  Serial.print("Aloha decivolts ");
   Serial.println(voltage);
   if (power == 1) {
     if (voltage < 180) count -= 1;
@@ -46,7 +46,7 @@ void loop() {
   }
   if (Serial.available() > 0) {
     inByte = Serial.read();
-    Serial.print("Aloha");
+    Serial.print("Aloha decivoltage ");
     Serial.println(inByte);
   }
 }
